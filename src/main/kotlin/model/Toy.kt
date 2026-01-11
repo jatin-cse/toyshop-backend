@@ -8,11 +8,11 @@ data class Toy(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long = 0,
+    val id: Long = 0,
 
-    var name: String = "",
+    val name: String,
 
-    var price: Double = 0.0,
+    val price: Double,
 
-    var category: String = ""
+    val category: String
 )
