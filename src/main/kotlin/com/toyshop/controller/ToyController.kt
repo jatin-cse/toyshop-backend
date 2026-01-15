@@ -2,7 +2,10 @@ package com.toyshop.controller
 
 import com.toyshop.model.Toy
 import com.toyshop.repository.ToyRepository
+import jakarta.validation.Valid
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping("/api/v1/toys")
@@ -12,25 +15,25 @@ class ToyController(
 
     // ✅ GET all toys
     @GetMapping
-    fun getAllToys(): List<Toy> {
-        return toyRepository.findAll()
-    }
+    fun getAllToys(): List<Toy> =
+        toyRepository.findAll()
 
     // ✅ ADD new toy
     @PostMapping
-    fun addToy(@RequestBody toy: Toy): Toy {
-        return toyRepository.save(toy)
-    }
+    fun addToy(@Valid @RequestBody toy: Toy): Toy =
+        toyRepository.save(toy)
 
     // ✅ UPDATE toy
     @PutMapping("/{id}")
     fun updateToy(
         @PathVariable id: Long,
-        @RequestBody toy: Toy
+        @Valid @RequestBody toy: Toy
     ): Toy {
 
         val existingToy = toyRepository.findById(id)
-            .orElseThrow { RuntimeException("Toy not found") }
+            .orElseThrow {
+                ResponseStatusException(HttpStatus.NOT_FOUND, "Toy not found")
+            }
 
         val updatedToy = existingToy.copy(
             name = toy.name,
@@ -43,13 +46,12 @@ class ToyController(
 
     // ✅ DELETE toy
     @DeleteMapping("/{id}")
-    fun deleteToy(@PathVariable id: Long): String {
+    fun deleteToy(@PathVariable id: Long) {
 
         if (!toyRepository.existsById(id)) {
-            throw RuntimeException("Toy not found")
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Toy not found")
         }
 
         toyRepository.deleteById(id)
-        return "Toy deleted successfully"
     }
 }
